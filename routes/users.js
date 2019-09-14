@@ -12,7 +12,7 @@ const dbGame = require('../models/games.js')
 //making a new game.....
 router.post('/newgame', restricted, (req,res) => {
     const { gameName, password } = req.body;
-
+    let id = req.params.id;  //user id, joining or creating a game.
     if (!gameName || !password || gameName.split('').length < 5 || password.split('').length < 5) {
         res.status(400).json({ message: "Must have a game name longer than 5 characters and password longer than 5 characters."})
     }
@@ -25,8 +25,18 @@ router.post('/newgame', restricted, (req,res) => {
 
     db
     .addGame(clean)
-    .then(result => {
-        res.json(result)
+    .then(result => { //creates game in 'game' table but need to also make a usergames table with foreign keys to join.
+        console.log(result)
+        let game_id = result.id;
+            db
+            .add(game_id, user_id) 
+            .then(usergame => {
+                console.log(usergame)
+                res.status(200).json(result)
+            })
+            .catch(err => {
+                res.status(500).json({ message: "Internal Server Error"})
+            })
     })
     .catch(err => {
         res.status(500).json({ message: "Internal Server Error"})
@@ -71,5 +81,18 @@ router.put('/addphrase/:gameid/:userid', restricted, (req, res) => {
     
 })
 
+
+router.delete('/:id', restricted, (req, res) => {
+    let id = req.params.id;
+
+    db
+    .deleteGame(id)
+    .then(result => {
+        res.status(200).json(result)
+    })
+    .catch(err => {
+        res.status(500).json({ message: "Internal Server Error"})
+    })
+})
 
 module.exports = router;
