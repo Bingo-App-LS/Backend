@@ -13,10 +13,10 @@ const dbSettings = (connection) => ({
   },
   useNullAsDefault: true,
   migrations: {
-    directory: './db/migrations'
+    directory: './database/migrations'
   },
   seeds: {
-    directory: `./db/seeds${process.env.NODE_ENV === 'testing' ? '/testing' : ''}`
+    directory: `./database/seeds${process.env.NODE_ENV === 'testing' ? '/testing' : ''}`
   }
 });
 
@@ -26,3 +26,4 @@ module.exports = {
   development: dbSettings(process.env.DB_DEV),
   production: dbSettings(process.env.DATABASE_URL)
 };
+
