@@ -56,7 +56,7 @@ router.put('/addphrase/:gameid/:userid', restricted, (req, res) => {
             creatorId: result.creatorId
         }
         db
-        .updateGameWithPhrase(newGame)
+        .updateGameWithPhrase(newGame, id)
         .then(newResult => {
             console.log(newResult)
             res.status(200).json(newResult)

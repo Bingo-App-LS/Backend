@@ -19,10 +19,10 @@ function addGame(game) {
     return db('game').insert(game).returning('*')
 }
 
-async function updateGameWithPhrase(newGame) {
-    await 
+async function updateGameWithPhrase(newGame, id) {
+    return db('game').where({ id }).update(newGame).returning('*')
 }
 
 async function findUsersGames(id) {
-    lets games = await db('usergames').where({ id == user_id })
+    lets games = await db('usergames').where({}).returning('*')
 }
