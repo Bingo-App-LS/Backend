@@ -5,7 +5,7 @@ exports.up = function(knex) {
             game.increments();
             game.string('name').notNullable().unique();
             game.specificType('phrases', 'varchar[]')
-            .defaultTo('[]')
+            .defaultTo('{}')
             .alter();
             game.string('password').notNullable();
             game.integer('creatorId').notNullable().references('id').inTable('users').onDelete('cascade');
