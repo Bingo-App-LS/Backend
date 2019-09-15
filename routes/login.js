@@ -15,7 +15,7 @@ router.post('/register', (req, res) => {
         return res.status(401).json({ message: "You are missing username or password."})
     }
 
-    if (user.username.split('').lenth === 0 || user.password.split('').length < 5) {
+    if (user.username.split('').length === 0 || user.password.split('').length < 5) {
         return res.status(400).json({ message: "password must be longer than 5 characters and username longer than 0 characters."})
     }
 

@@ -199,3 +199,10 @@ router.get('shuffledboard/:id/:gameid', (req, res) => {
     })
 })
 module.exports = router;
+
+//phrase needs to be and obj = {
+   // saying: ""
+   // hasBeenSaid: T or F
+   // whoSubmitted saying: id of user//
+   //whoSaysIt: person who says the saying.
+//}
