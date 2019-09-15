@@ -10,10 +10,12 @@ const dbGame = require('../models/games.js')
 
 //begins in /users
 //making a new game.....
-router.post('/newgame', restricted, (req,res) => {
+router.post('/newgame/:id', restricted, (req,res) => {
     const { gameName, password } = req.body;
-    let id = req.params.id;  //user id, joining or creating a game.
-    if (!gameName || !password || gameName.split('').length < 5 || password.split('').length < 5) {
+    const hash = bcrypt.hashSync(password);
+    password = hash;
+    let id = req.params.id;  //user id, creating a game.
+    if (!gameName || !password || password.split('').length < 5) {
         res.status(400).json({ message: "Must have a game name longer than 5 characters and password longer than 5 characters."})
     }
 
@@ -21,6 +23,7 @@ router.post('/newgame', restricted, (req,res) => {
         gameName: gameName,
         password: password,
         phrases: [],
+        creatorId: id
     }
 
     db
@@ -43,7 +46,33 @@ router.post('/newgame', restricted, (req,res) => {
     })
 })
 
-//phrase send in the body.
+//this post allows a user that doesn't create the game to login in using the given gamename and password to the user.  Will then add them tot the 'usergames' table and will allow to use foreign keys....
+router.post('/newgameuser/:id', (req, res) => {
+    let userid = req.params.id;
+    let game = req.body;
+    if (!game.name || !game.password) {
+        res.status(400).json({ message: "Must have a game name and password in the request body."})
+    }
+    db
+    .findGameByGameName(game.name)
+    .then(result => {
+        if (result && bcrypt.compareSync(game.password, result.password)) {
+            db
+            .add(result.id, userid)
+            .then(user => {
+                res.status(200).json(user)
+            })
+            .catch(err => {
+                res.status(500).json({ message: "Internal Server Error"})
+            })
+        }
+    })
+    .catch(err => {
+        res.status(500).json({ message: "Internal Server Error"})
+    })
+})
+
+//phrase send in the body.//This router allows us to add phrases to the game.  we will return the result that is in their and spread in the phrases into the new array and then add the new phrase at the end.....
 router.put('/addphrase/:gameid/:userid', restricted, (req, res) => {
     let gameId = req.params.gameid;
     let userId = req.params.userid;
@@ -66,7 +95,7 @@ router.put('/addphrase/:gameid/:userid', restricted, (req, res) => {
             creatorId: result.creatorId
         }
         db
-        .updateGameWithPhrase(newGame, id)
+        .updateGameWithPhrase(newGame, gameId)
         .then(newResult => {
             console.log(newResult)
             res.status(200).json(newResult)
@@ -81,6 +110,35 @@ router.put('/addphrase/:gameid/:userid', restricted, (req, res) => {
     
 })
 
+//deletes a phrase by index number.
+router.delete('/deletephrase/:gameid/:phraseIndex', restricted, (req, res) => {
+    let phraseIndex = req.params.phraseIndex;
+    let gameId = req.params.gameid;
+
+    db
+    .findGameById(gameId)
+    .then(async (result) => {
+        const newPhrases = await result.phrases.filter((item, index) => {
+            index !== phraseIndex
+        })
+        let clean = {
+            id: result.id,
+            name: result.name,
+            password: result.password,
+            creatorId: result.creatorId,
+            phrases: newPhrases
+        }
+        db
+        .updateGameWithPhrase(clean)
+        .then(newResult => {
+            res.status(200).json({ message: "Internal Server Error"})
+        })
+    })
+    .catch(err => {
+        res.status(500).json({ message: "Internal Server Error"})
+    })
+})
+
 
 router.delete('/:id', restricted, (req, res) => {
     let id = req.params.id;
@@ -93,6 +151,22 @@ router.delete('/:id', restricted, (req, res) => {
     .catch(err => {
         res.status(500).json({ message: "Internal Server Error"})
     })
+})
+
+//purpose is to call 'usergames' table using the user id and find all the ids of the games they are participating in and return the games list.......
+router.get('/findusergames/:id', (req, res) => {
+    let id = req.params.id; //id of the user.....
+
+    db
+    .findUsersGames(id)
+    .then(result => {
+        res.status(200).json(result)
+    })
+    .catch(err => {
+        res.status(500).json({ message: "Internal Server Error"})
+    })
+
+
 })
 
 module.exports = router;
