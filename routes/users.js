@@ -169,4 +169,18 @@ router.get('/findusergames/:id', (req, res) => {
 
 })
 
+
+//making a shuffled board for the user of the game//
+router.post('/shuffleboard/:id/:gameid', (req, res) => {
+    let id = req.params.id;
+    let gameId = req.params.gameid;
+    db
+    .shuffleGameBoard(id, gameId)
+    .then(result => {
+        res.status(200).json(result)
+    })
+    .catch(err => {
+        res.status(500).json({ message: "Internal Server Error"})
+    })
+})
 module.exports = router;

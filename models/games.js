@@ -8,8 +8,8 @@ module.exports = {
     findUsersGames,
     updateGameWithPhrase,
     deleteGame,
-    findGameByGameName
-    // shuffleGameBoard
+    findGameByGameName,
+    shuffleGameBoard
 }
 
 function findGameById(id) {
@@ -44,4 +44,28 @@ function deleteGame(id) {
 //adds to the usergames//
 function add(game_id, user_id) {
     return db('usergames').insert(game_id, user_id).returning('*')
+}
+
+async function shuffleGameBoard(id, gameId) {
+    const currentGame = await db('game').where({ gameId }).returning('*')
+    const nums = [];
+    for (let i = 0; i < 17; i++) {
+        while (nums.length < 17){
+            let number = Math.floor(Math.random() * Math.floor(16))
+            if (!nums.includes(number)){
+                nums.push(number)
+            }
+        }
+    }
+    
+    const newPhraseList = await currentGame.phrases.map((phrase, index) => {
+        [currentGame.phrases[index], currentGame.phrases[nums[index]]] = [currentGame.phrases[nums[index]], currentGame.phrases[index]]
+    })
+
+    let clean = {
+        user_id: id,
+        game_id: gameId,
+        phrase: newPhraseList,
+    }
+    return db('shuffledboard').insert(clean).returning('*')
 }
