@@ -12,7 +12,7 @@ module.exports = {
 function add(user){
     return db('users')
         .insert(user)
-        .returning('*')
+        
 }
 
 function remove(id) {
