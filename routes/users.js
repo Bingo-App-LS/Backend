@@ -183,4 +183,19 @@ router.post('/shuffleboard/:id/:gameid', (req, res) => {
         res.status(500).json({ message: "Internal Server Error"})
     })
 })
+
+//finds a board that has already been shuffled....
+router.get('shuffledboard/:id/:gameid', (req, res) => {
+    let id = req.params.id;
+    let gameId = req.params.gameid;
+
+    db
+    .findShuffledBoard(id, gameId)
+    .then(result => {
+        res.status(200).json(result)
+    })
+    .catch(err => {
+        res.status(500).json({ message: "Internal Server Error"})
+    })
+})
 module.exports = router;

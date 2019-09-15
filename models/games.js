@@ -9,7 +9,8 @@ module.exports = {
     updateGameWithPhrase,
     deleteGame,
     findGameByGameName,
-    shuffleGameBoard
+    shuffleGameBoard,
+    findShuffledBoard
 }
 
 function findGameById(id) {
@@ -68,4 +69,8 @@ async function shuffleGameBoard(id, gameId) {
         phrase: newPhraseList,
     }
     return db('shuffledboard').insert(clean).returning('*')
+}
+
+function findShuffledBoard(id, gameId){
+    return db('shuffledboard').where({ user_id: id, game_id: gameId }).returning("*")
 }
