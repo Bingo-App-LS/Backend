@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const restricted = require('../api/restricted.js');
 const db = require('../models/users.js')
-
+const secret = require('../config/secrets.js')
 
 
 router.post('/register', (req, res) => {
@@ -21,7 +21,7 @@ router.post('/register', (req, res) => {
 
     let clean = {
         username: user.username,
-        password: hash
+        password: user.password
     }
     db
     .add(clean)
@@ -29,7 +29,6 @@ router.post('/register', (req, res) => {
         res.json(result)
     })
     .catch(err => {
-        console.error(err)
         res.status(500).json(err)
     })
 })
@@ -37,8 +36,7 @@ router.post('/register', (req, res) => {
 
 router.post('/', (req, res) => {
     let { username, password } = req.body;
-
-    if (!username && !password){
+    if (!username || !password){
         res.status(400).json({ message: "Bad Request."})
     }
 
@@ -47,7 +45,7 @@ router.post('/', (req, res) => {
     .then(user => {
         if (user && bcrypt.compareSync(password, user.password))
         {
-            const tokne = generateToken(user)
+            const token = generateToken(user)
             res.status(200).json({id: user.id, username: user.username, token: token})
         }
         else {

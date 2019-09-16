@@ -18,8 +18,8 @@ function remove(id) {
     return db('users').where({ id }).del()
 }
 
-function findUser(id) {
-    return db('users').where({ id }).returning("*").first();
+function findUser(username) {
+    return db('users').where({ username }).first();
 }
 
 async function findAllUsersOfGame(game_id) {
