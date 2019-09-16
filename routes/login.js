@@ -30,8 +30,7 @@ router.post('/register', (req, res) => {
         res.json(result)
     })
     .catch(err => {
-        console.error(err)
-        res.status(500).json({ message: "Internal Server Error"})
+        res.status(500).json(err)
     })
 })
 
