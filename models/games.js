@@ -6,10 +6,10 @@ module.exports = {
     addGame,
     findGameById,
     findUsersGames,
-    updateGameWithPhrase,
+    addPhrase,
     deleteGame,
     findGameByGameName,
-    shuffleGameBoard,
+    shuffledGameBoard,
     findShuffledBoard
 }
 
@@ -25,8 +25,8 @@ function addGame(game) {
     return db('game').insert(game).returning('*')
 }
 
-function updateGameWithPhrase(newGame, id) {
-    return db('game').where({ id }).update(newGame).returning('*')
+function addPhrase(phrase) {
+    return db('phrases').insert(phrase).returning('*')
 }
 
 async function findUsersGames(id) {
@@ -47,8 +47,8 @@ function add(game_id, user_id) {
     return db('usergames').insert(game_id, user_id).returning('*')
 }
 
-async function shuffleGameBoard(id, gameId) {
-    const currentGame = await db('game').where({ gameId }).returning('*')
+async function shuffledGameBoard(id, gameId) {
+    const currentGame = await db('phrases').where({ gameId: gameId }).returning('*')
     const nums = [];
     for (let i = 0; i < 17; i++) {
         while (nums.length < 17){
@@ -59,8 +59,8 @@ async function shuffleGameBoard(id, gameId) {
         }
     }
     
-    const newPhraseList = await currentGame.phrases.map((phrase, index) => {
-        [currentGame.phrases[index], currentGame.phrases[nums[index]]] = [currentGame.phrases[nums[index]], currentGame.phrases[index]]
+    const newPhraseList = await currentGame.map((phrase, index) => {
+        [currentGame.phrase[index], currentGame.phrase[nums[index]]] = [currentGame.phrase[nums[index]], currentGame.phrase[index]]
     })
 
     let clean = {

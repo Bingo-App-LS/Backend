@@ -11,30 +11,31 @@ const dbGame = require('../models/games.js')
 //begins in /users
 //making a new game.....
 router.post('/newgame/:id', restricted, (req,res) => {
-    const { gameName, password } = req.body;
+    const { name, password } = req.body;
     const hash = bcrypt.hashSync(password);
     password = hash;
     let id = req.params.id;  //user id, creating a game.
-    if (!gameName || !password || password.split('').length < 5) {
+    if (!name || !password || password.split('').length < 5) {
         res.status(400).json({ message: "Must have a game name longer than 5 characters and password longer than 5 characters."})
     }
 
     const clean = {
-        gameName: gameName,
+        gameName: name,
         password: password,
         phrases: [],
-        creatorId: id
+        creatorId: id,
+        inProgress: false
     }
 
     db
     .addGame(clean)
     .then(result => { //creates game in 'game' table but need to also make a usergames table with foreign keys to join.
-        console.log(result)
+        // console.log(result)
         let game_id = result.id;
             db
             .add(game_id, user_id) 
             .then(usergame => {
-                console.log(usergame)
+                // console.log(usergame)
                 res.status(200).json(result)
             })
             .catch(err => {
@@ -72,72 +73,6 @@ router.post('/newgameuser/:id', (req, res) => {
     })
 })
 
-//phrase send in the body.//This router allows us to add phrases to the game.  we will return the result that is in their and spread in the phrases into the new array and then add the new phrase at the end.....
-router.put('/addphrase/:gameid/:userid', restricted, (req, res) => {
-    let gameId = req.params.gameid;
-    let userId = req.params.userid;
-    let phrase = req.body;
-    if (!gameId || !userId) {
-        return res.status(400).json({ message: "You need both user id of user that clicked create and game id of the game you wish to update."})
-    }
-
-    //get the game with that id.  spread in the phrases and add new phrase.
-    db
-    .findGameById(gameId)
-    .then(result => {
-        console.log(result)
-        let phrases = [...result.phrases, phrase]
-        let newGame = {
-            id: result.id,
-            phrases: phrases,
-            name: result.name,
-            password: result.password,
-            creatorId: result.creatorId
-        }
-        db
-        .updateGameWithPhrase(newGame, gameId)
-        .then(newResult => {
-            console.log(newResult)
-            res.status(200).json(newResult)
-        })
-        .catch(err => {
-            res.status(500).json({ message: "Internal Server Error"})
-        })
-    })
-    .catch(err => {
-        res.status(500).json({ message: "Internal Server Error"})
-    })
-    
-})
-
-//deletes a phrase by index number.
-router.delete('/deletephrase/:gameid/:phraseIndex', restricted, (req, res) => {
-    let phraseIndex = req.params.phraseIndex;
-    let gameId = req.params.gameid;
-
-    db
-    .findGameById(gameId)
-    .then(async (result) => {
-        const newPhrases = await result.phrases.filter((item, index) => {
-            index !== phraseIndex
-        })
-        let clean = {
-            id: result.id,
-            name: result.name,
-            password: result.password,
-            creatorId: result.creatorId,
-            phrases: newPhrases
-        }
-        db
-        .updateGameWithPhrase(clean)
-        .then(newResult => {
-            res.status(200).json({ message: "Internal Server Error"})
-        })
-    })
-    .catch(err => {
-        res.status(500).json({ message: "Internal Server Error"})
-    })
-})
 
 
 router.delete('/:id', restricted, (req, res) => {
@@ -169,9 +104,34 @@ router.get('/findusergames/:id', (req, res) => {
 
 })
 
+//adds a phrase
+router.post('/addphrase/:gameId/:userId', (req, res) => {
+    let id = req.params.id //users id
+    let gameId = req.params.gameId;
+
+    if (!req.body.saying || !req.body.whoSaysIt){
+        return res.status(400).json({ message: "There needs to be a saying and who says it "})
+    }
+
+    let clean = {
+        game_id: gameId,
+        saying: req.body.saying,
+        whoSaysIt: req.body.whoSaysIt,
+        whoSubmittedIt: id,
+        hasBeenSaid: false
+    }
+    db
+    .addPhrase(clean)
+    .then(result => {
+        res.json(result)
+    })
+    .catch(err => {
+        res.status(500).json({ message: "Internal Server Error"})
+    })
+})
 
 //making a shuffled board for the user of the game//
-router.post('/shuffleboard/:id/:gameid', (req, res) => {
+router.post('/shuffledboard/:id/:gameid', (req, res) => {
     let id = req.params.id;
     let gameId = req.params.gameid;
     db
