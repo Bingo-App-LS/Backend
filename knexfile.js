@@ -23,7 +23,19 @@ const dbSettings = (connection) => ({
 // Configures knex for DB clusters in each environment
 module.exports = {
   testing: dbSettings(process.env.DB_TEST),
-  development: dbSettings(process.env.DB_DEV),
-  production: dbSettings(process.env.DATABASE_URL)
+  production: dbSettings(process.env.DATABASE_URL),
+  development: {
+      client: 'sqlite3',
+      userNullAsDefault: true,
+      connection: {
+        filename: './database/bingo.db3'
+      },
+      migrations: {
+        directory: './database/migrations'
+      },
+      seeds: {
+        directory: './database/seeds'
+      }
+    },
 };
 

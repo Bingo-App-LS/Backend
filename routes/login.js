@@ -8,28 +8,28 @@ const db = require('../models/users.js')
 
 router.post('/register', (req, res) => {
     let user = req.body;
-    const hash = bcrypt.hash(user.password);
+    const hash = bcrypt.hashSync(user.password);
     user.password = hash;
 
     if (!user.username || !user.password) {
         return res.status(401).json({ message: "You are missing username or password."})
     }
 
-    if (user.username.split('').length === 0 || user.password.split('').length < 5) {
+    if (user.username.split('').length === 0) {
         return res.status(400).json({ message: "password must be longer than 5 characters and username longer than 0 characters."})
     }
 
     let clean = {
         username: user.username,
-        password: user.password
+        password: hash
     }
-
     db
     .add(clean)
     .then(result => {
         res.json(result)
     })
     .catch(err => {
+        console.error(err)
         res.status(500).json(err)
     })
 })
@@ -38,7 +38,7 @@ router.post('/register', (req, res) => {
 router.post('/', (req, res) => {
     let { username, password } = req.body;
 
-    if (!username || !password){
+    if (!username && !password){
         res.status(400).json({ message: "Bad Request."})
     }
 
