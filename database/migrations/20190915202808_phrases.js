@@ -6,7 +6,7 @@ exports.up = function(knex) {
       tbl.string('saying').notNullable();
       tbl.string('whoSaysIt').notNullable();
       tbl.boolean('hasBeenSaid').notNullable();
-      tbl.whoSubmittedIt('userId').notNullable().references('id').inTable('users').onDelete('cascade');
+      tbl.integer('whoSubmittedIt').notNullable().references('id').inTable('users').onDelete('cascade');
   })
 };
 
