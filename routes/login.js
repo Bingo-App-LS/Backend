@@ -19,8 +19,13 @@ router.post('/register', (req, res) => {
         return res.status(400).json({ message: "password must be longer than 5 characters and username longer than 0 characters."})
     }
 
+    let clean = {
+        username: user.username,
+        password: user.password
+    }
+
     db
-    .add(user)
+    .add(clean)
     .then(result => {
         res.json(result)
     })
