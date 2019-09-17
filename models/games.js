@@ -49,18 +49,10 @@ function add(game_id, user_id) {
 
 async function shuffledGameBoard(id, gameId) {
     const currentGame = await db('phrases').where({ gameId: gameId }).returning('*')
-    const nums = [];
-    for (let i = 0; i < 17; i++) {
-        while (nums.length < 17){
-            let number = Math.floor(Math.random() * Math.floor(16))
-            if (!nums.includes(number)){
-                nums.push(number)
-            }
-        }
-    }
     
     const newPhraseList = await currentGame.map((phrase, index) => {
-        [currentGame.phrase[index], currentGame.phrase[nums[index]]] = [currentGame.phrase[nums[index]], currentGame.phrase[index]]
+        let number = Math.floor(Math.random() * Math.floor(16))
+        [currentGame.phrase[index], currentGame.phrase[number]] = [currentGame.phrase[number], currentGame.phrase[index]]
     })
 
     let clean = {
