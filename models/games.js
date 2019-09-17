@@ -48,9 +48,9 @@ function add(game_id, user_id) {
 }
 
 async function shuffledGameBoard(id, gameId) {
-    const currentGame = await db('phrases').where({ gameId: gameId }).returning('*')
+    const currentGame = await db('phrases').where({ gameId: gameId })
     
-    const newPhraseList = await currentGame.map((phrase, index) => {
+    currentGame.map((phrase, index) => {
         let number = Math.floor(Math.random() * Math.floor(16))
         [currentGame.phrase[index], currentGame.phrase[number]] = [currentGame.phrase[number], currentGame.phrase[index]]
     })
@@ -58,8 +58,9 @@ async function shuffledGameBoard(id, gameId) {
     let clean = {
         user_id: id,
         game_id: gameId,
-        phrase: newPhraseList,
+        phrase: currentGame,
     }
+    
     return db('shuffledboard').insert(clean).returning('*')
 }
 
