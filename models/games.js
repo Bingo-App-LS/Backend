@@ -17,8 +17,8 @@ function findGameById(id) {
     return db('game').where({ id }).returning('*').first()
 }
 
-function findGameByGameName(gameName) {
-    return db('game').where({ gameName }).returning('*').first()
+function findGameByGameName(name) {
+    return db('game').where({ name }).first()
 }
 
 function addGame(game) {
@@ -30,11 +30,8 @@ function addPhrase(phrase) {
 }
 
 async function findUsersGames(id) {
-    const userGames = await db('usergames').where({ user_id: id}).returning('*');
-    listOfGames = userGames.map(game => {
-         db('game').where({ id: game.game_id}).returning('*')
-    })
-    return listOfGames
+    return db('usersgames').where({ user_id: id}).returning('*');
+    
 }
 
 
@@ -42,9 +39,9 @@ function deleteGame(id) {
     return db('game').where({ id }).del().first();
 }
 
-//adds to the usergames//
-function add(game_id, user_id) {
-    return db('usergames').insert(game_id, user_id).returning('*')
+//adds to the usersgames//
+function add(gameIDs) {
+    return db('usersgames').insert(gameIDs).returning('*')
 }
 
 async function shuffledGameBoard(id, gameId) {
@@ -60,7 +57,7 @@ async function shuffledGameBoard(id, gameId) {
         game_id: gameId,
         phrase: currentGame,
     }
-    
+
     return db('shuffledboard').insert(clean).returning('*')
 }
 

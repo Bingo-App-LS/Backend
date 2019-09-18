@@ -10,65 +10,63 @@ const dbGame = require('../models/games.js')
 
 //begins in /users
 //making a new game.....
+//working///
 router.post('/newgame/:id', restricted, (req,res) => {
-    const { name, password } = req.body;
+    let { name, password } = req.body;
     const hash = bcrypt.hashSync(password);
     password = hash;
     let id = req.params.id;  //user id, creating a game.
-    if (!name || !password || password.split('').length < 5) {
-        res.status(400).json({ message: "Must have a game name longer than 5 characters and password longer than 5 characters."})
+    if (!name || !password) {
+        res.status(400).json({ message: "Must have a game name and a password in body of the request."})
     }
 
     const clean = {
-        gameName: name,
+        name: name,
         password: password,
-        phrases: [],
         creatorId: id,
         inProgress: false
     }
-
-    db
+    
+    dbGame
     .addGame(clean)
     .then(result => { //creates game in 'game' table but need to also make a usergames table with foreign keys to join.
-        // console.log(result)
-        let game_id = result.id;
-            db
-            .add(game_id, user_id) 
-            .then(usergame => {
-                // console.log(usergame)
-                res.status(200).json(result)
-            })
-            .catch(err => {
-                res.status(500).json({ message: "Internal Server Error"})
-            })
+        res.status(200).json(result)
     })
     .catch(err => {
+        console.error(err)
         res.status(500).json({ message: "Internal Server Error"})
     })
 })
 
 //this post allows a user that doesn't create the game to login in using the given gamename and password to the user.  Will then add them tot the 'usergames' table and will allow to use foreign keys....
+//working////
 router.post('/newgameuser/:id', (req, res) => {
     let userid = req.params.id;
     let game = req.body;
     if (!game.name || !game.password) {
         res.status(400).json({ message: "Must have a game name and password in the request body."})
     }
-    db
+    dbGame
     .findGameByGameName(game.name)
     .then(result => {
         if (result && bcrypt.compareSync(game.password, result.password)) {
-            db
-            .add(result.id, userid)
+            let cleaner = {
+                game_id: result.id,
+                user_id: userid
+            }
+            dbGame
+            .add(cleaner)
             .then(user => {
                 res.status(200).json(user)
             })
             .catch(err => {
+                console.error(err)
                 res.status(500).json({ message: "Internal Server Error"})
             })
         }
     })
     .catch(err => {
+        console.error(err)
         res.status(500).json({ message: "Internal Server Error"})
     })
 })
@@ -78,7 +76,7 @@ router.post('/newgameuser/:id', (req, res) => {
 router.delete('/:id', restricted, (req, res) => {
     let id = req.params.id;
 
-    db
+    dbGame
     .deleteGame(id)
     .then(result => {
         res.status(200).json(result)
@@ -88,11 +86,11 @@ router.delete('/:id', restricted, (req, res) => {
     })
 })
 
-//purpose is to call 'usergames' table using the user id and find all the ids of the games they are participating in and return the games list.......
+//purpose is to call 'usergames' table using the user id and find all the ids of the games they are participating in and return the games list.......//working////
 router.get('/findusergames/:id', (req, res) => {
     let id = req.params.id; //id of the user.....
 
-    db
+    dbGame
     .findUsersGames(id)
     .then(result => {
         res.status(200).json(result)
@@ -120,7 +118,7 @@ router.post('/addphrase/:gameId/:userId', (req, res) => {
         whoSubmittedIt: id,
         hasBeenSaid: false
     }
-    db
+    dbGame
     .addPhrase(clean)
     .then(result => {
         res.json(result)
@@ -134,7 +132,7 @@ router.post('/addphrase/:gameId/:userId', (req, res) => {
 router.post('/shuffledboard/:id/:gameid', (req, res) => {
     let id = req.params.id;
     let gameId = req.params.gameid;
-    db
+    dbGame
     .shuffleGameBoard(id, gameId)
     .then(result => {
         res.status(200).json(result)
@@ -149,7 +147,7 @@ router.get('shuffledboard/:id/:gameid', (req, res) => {
     let id = req.params.id;
     let gameId = req.params.gameid;
 
-    db
+    dbGame
     .findShuffledBoard(id, gameId)
     .then(result => {
         res.status(200).json(result)
