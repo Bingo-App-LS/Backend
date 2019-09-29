@@ -1,6 +1,8 @@
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
+const authRoutes = require('../routes/authRoutes');
+const passportSetup = require('./passport');
 
 const server = express();
 
@@ -14,6 +16,8 @@ const login = require('../routes/login')
 
 server.use('/login', login)
 server.use('/users', user);
+server.use(authRoutes);
+
 // server.use('/games', games);
 
 module.exports = server;

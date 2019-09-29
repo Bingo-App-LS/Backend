@@ -4,6 +4,7 @@ exports.up = function(knex) {
       user.increments();
       user.string('username').unique().notNullable()
       user.string('password').notNullable()
+      user.string('googleId').unique()
   })
 };
 

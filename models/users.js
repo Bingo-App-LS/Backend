@@ -6,7 +6,8 @@ module.exports = {
     findUser,
     add,
     remove,
-    findAllUsersOfGame
+    findAllUsersOfGame,
+    findUserByID
 }
 
 function add(user){
@@ -20,6 +21,10 @@ function remove(id) {
 
 function findUser(username) {
     return db('users').where({ username }).first();
+}
+
+function findUserByID(username) {
+    return db('users').where({ id }).first();
 }
 
 async function findAllUsersOfGame(game_id) {
